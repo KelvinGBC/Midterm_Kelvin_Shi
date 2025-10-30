@@ -11,21 +11,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private val tableList = ArrayList<String>()
     private lateinit var adapter: ArrayAdapter<String>
+    private lateinit var clearButton: Button
     companion object {
         val historyList = ArrayList<Int>()
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        clearButton = findViewById(R.id.clearButton)
+        clearButton.setOnClickListener {
+            clearAll()
+        }
         numberInput = findViewById(R.id.numberInput)
         generateButton = findViewById(R.id.generateButton)
         historyButton = findViewById(R.id.historyButton)
         listView = findViewById(R.id.listView)
-
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, tableList)
         listView.adapter = adapter
-
         generateButton.setOnClickListener { generateTable() }
         listView.setOnItemClickListener { _, _, position, _ -> confirmDelete(position) }
         historyButton.setOnClickListener { openHistory() }
@@ -54,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         val item = tableList[position]
         AlertDialog.Builder(this)
             .setTitle("Delete Row")
-            .setMessage("Delete $item?")
+            .setMessage("Are you sure?")
             .setPositiveButton("Yes") { _, _ ->
                 tableList.removeAt(position)
                 adapter.notifyDataSetChanged()
@@ -66,5 +68,17 @@ class MainActivity : AppCompatActivity() {
     private fun openHistory() {
         val intent = Intent(this, HistoryActivity::class.java)
         startActivity(intent)
+    }
+    private fun clearAll() {
+        AlertDialog.Builder(this)
+            .setTitle("Clear All")
+            .setMessage("Delete all rows?")
+            .setPositiveButton("Yes") { _, _ ->
+                tableList.clear()
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, "All rows cleared", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("No", null)
+            .show()
     }
 }
