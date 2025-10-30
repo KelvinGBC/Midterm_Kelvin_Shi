@@ -1,47 +1,70 @@
 package com.example.midterm_kelvin_shi
-
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.midterm_kelvin_shi.ui.theme.Midterm_Kelvin_ShiTheme
-
-class MainActivity : ComponentActivity() {
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+class MainActivity : AppCompatActivity() {
+    private lateinit var numberInput: EditText
+    private lateinit var generateButton: Button
+    private lateinit var historyButton: Button
+    private lateinit var listView: ListView
+    private val tableList = ArrayList<String>()
+    private lateinit var adapter: ArrayAdapter<String>
+    companion object {
+        val historyList = ArrayList<Int>()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Midterm_Kelvin_ShiTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+        setContentView(R.layout.activity_main)
+
+        numberInput = findViewById(R.id.numberInput)
+        generateButton = findViewById(R.id.generateButton)
+        historyButton = findViewById(R.id.historyButton)
+        listView = findViewById(R.id.listView)
+
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, tableList)
+        listView.adapter = adapter
+
+        generateButton.setOnClickListener { generateTable() }
+        listView.setOnItemClickListener { _, _, position, _ -> confirmDelete(position) }
+        historyButton.setOnClickListener { openHistory() }
+    }
+    private fun generateTable() {
+        val input = numberInput.text.toString()
+        if (input.isEmpty()) {
+            Toast.makeText(this, "Enter a number", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val num = input.toInt()
+        tableList.clear()
+
+        for (i in 1..10) {
+            tableList.add("$num × $i = ${num * i}")
+        }
+
+        adapter.notifyDataSetChanged()
+
+        if (!historyList.contains(num)) {
+            historyList.add(num)
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Midterm_Kelvin_ShiTheme {
-        Greeting("Android")
+    private fun confirmDelete(position: Int) {
+        val item = tableList[position]
+        AlertDialog.Builder(this)
+            .setTitle("Delete Row")
+            .setMessage("Delete $item?")
+            .setPositiveButton("Yes") { _, _ ->
+                tableList.removeAt(position)
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, "Deleted: $item", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+    private fun openHistory() {
+        val intent = Intent(this, HistoryActivity::class.java)
+        startActivity(intent)
     }
 }
