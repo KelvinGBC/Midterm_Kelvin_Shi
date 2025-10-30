@@ -11,3 +11,6 @@ Main screen:
 
 History screen:
 - Shows numbers you generated.
+
+Kelvin Shi
+101490243
